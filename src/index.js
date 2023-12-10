@@ -1,7 +1,7 @@
 const express = require('express');
 const routerApi = require('./routes/api/index.api');
 const pool = require('../db');
-
+const cors= require('cors');
 const {PORT}=require('../config.js');
 const { errorHandler,logErrors,boomErrorHandler } = require('./middlewares/error.handler.js');
 
@@ -9,6 +9,7 @@ const app = express();
 const port = 3000;
 
 app.use(express.json())
+app.use(cors())
 routerApi(app);
 
 //middlware de tipo error van despues del routing

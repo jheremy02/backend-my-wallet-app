@@ -10,7 +10,10 @@ const getUsers = async (req, res,next) => {
 
     try {
         const result = await service.getUsers()
-        res.json(result)
+        res.json({
+            data:result,
+            success:true
+        })
     } catch (error) {
         next(error)
     }
@@ -25,7 +28,7 @@ const createUser = async (req, res) => {
         // [rows] destructuring de un array -> [rows] = [x,y,z] rows toma del valor de x respectivamente
         const rows = await service.createUser({ first_name, last_name, email, description })
 
-        res.json({ id: rows.insertId, first_name, last_name, email, description })
+        res.json({data:{ id: rows.insertId, first_name, last_name, email, description },success:true})
     } catch (error) {
 
         next(error)
@@ -54,7 +57,7 @@ const updateUser = async (req, res,next) => {
         }
 
         const userResult = await service.getUser(id)
-        res.json({ message: 'updated successfully', status: true, user: { ...userResult[0]  } })
+        res.json({ message: 'updated successfully', success: true, data: { ...userResult[0]  } })
 
     } catch (error) {
 
@@ -74,7 +77,10 @@ const getUser = async (req, res,next) => {
             throw boom.notFound('User not found')
         }
 
-        res.json({ ...user[0] });
+        res.json({
+            data:{ ...user[0] },
+            success:true
+        });
 
     } catch (error) {
 
@@ -95,7 +101,7 @@ const deleteUser = async (req, res) => {
 
         }
 
-        res.json({ message: 'deleted successfully', status: true })
+        res.json({ message: 'deleted successfully', success: true })
     } catch (error) {
 
         next(error)

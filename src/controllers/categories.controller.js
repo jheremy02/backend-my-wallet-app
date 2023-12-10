@@ -1,7 +1,7 @@
 const pool = require("../../db")
 const CategoryService = require("../services/categories.service")
 
-const boom = require("@hapi/boom")
+
 
 const service = new CategoryService
 
@@ -13,7 +13,10 @@ const getCategory = async (req, res, next) => {
             throw boom.notFound('category not found')
         }
 
-        res.json({ ...result[0] })
+        res.json({
+            data:{ ...result[0] },
+            success:true
+        })
 
     } catch (error) {
         next(error)
@@ -23,7 +26,10 @@ const getCategory = async (req, res, next) => {
 const getCategories = async (req, res, next) => {
     try {
         const result = await service.getCategories()
-        res.json(result)
+        res.json({
+            data:result,
+            success:true
+        })
     } catch (error) {
         next(error)
     }
@@ -33,7 +39,10 @@ const createCategory = async (req, res, next) => {
     try {
         const { name, id_user, type_operation } = req.body
         const result = await service.createCategory({ name, id_user, type_operation })
-        res.json({ id: result.insertId, name, id_user, type_operation })
+        res.json({
+            data:{ id: result.insertId, name, id_user, type_operation },
+            success:true
+        })
     } catch (error) {
 
         next(error)
@@ -55,7 +64,7 @@ const updateCategory = async (req, res, next) => {
         }
 
         const categoryFound = await service.getCategory(id)
-        res.json({ message: 'updated successfully', status: true, category: { ...categoryFound[0] } })
+        res.json({ message: 'updated successfully', success: true, category: { ...categoryFound[0] } })
 
     } catch (error) {
         next(error)
@@ -73,7 +82,7 @@ const deleteCategory = async (req, res, next) => {
 
         }
 
-        res.json({ message: 'deleted successfully', status: true })
+        res.json({ message: 'deleted successfully', success: true })
     } catch (error) {
 
         next(error)
