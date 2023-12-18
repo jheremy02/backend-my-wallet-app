@@ -10,6 +10,7 @@ const port = 3000;
 
 app.use(express.json())
 app.use(cors())
+require('./utils/auth/index.js')
 routerApi(app);
 
 //middlware de tipo error van despues del routing

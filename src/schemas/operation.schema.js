@@ -25,10 +25,22 @@ const updateOperationSchema=Joi.object({
     description:description
 }).unknown(true)
 
+const deleteOperationSchema=Joi.object({
+    id:id.required()
+}).unknown(true)
 
+const getOperationSchema=Joi.object({
+    id:id.required()
+}).unknown(true)
+
+const getOperationsSchema=Joi.object({
+    id:id.required()
+}).unknown(true)
 
 
 module.exports={
-    createOperationSchema,updateOperationSchema
+
+    createOperationSchema,updateOperationSchema,getOperationSchema,
+    getOperationsSchema,deleteOperationSchema
 }
 

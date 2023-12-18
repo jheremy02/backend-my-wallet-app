@@ -7,7 +7,7 @@ const service = new CategoryService
 
 const getCategory = async (req, res, next) => {
     try {
-        const result = await service.getCategory(req.params.id)
+        const result = await service.getCategory(req.query.id)
 
         if (result.length <= 0) {
             throw boom.notFound('category not found')
@@ -74,7 +74,7 @@ const updateCategory = async (req, res, next) => {
 
 const deleteCategory = async (req, res, next) => {
     try {
-        const rows = await service.deleteCategory(req.params.id)
+        const rows = await service.deleteCategory(req.query.id)
 
         if (rows.affectedRows <= 0) {
 

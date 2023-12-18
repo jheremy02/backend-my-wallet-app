@@ -3,6 +3,7 @@ const pool = require('../../../db')
 const {getUsers,createUser,getUser, deleteUser, updateUser} = require('../../controllers/users.controller')
 const { validatorHandler } = require('../../middlewares/validator.handler')
 const { creatUserSchema } = require('../../schemas/user.schema')
+const { checkApiKey } = require('../../middlewares/auth.handler')
 
 
 const router= express.Router()

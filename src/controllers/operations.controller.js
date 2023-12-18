@@ -76,7 +76,7 @@ const updateOperation = async (req, res, next) =>{
 
 const deleteOperation=async (req, res, next)=>{
     try {
-        const {id}=req.body
+        const {id}=req.query
         const [result]= await service.deleteOperation(id)
       
         if (result.affectedRows <= 0) {
@@ -89,6 +89,8 @@ const deleteOperation=async (req, res, next)=>{
         next(error)
     }
 }
+
+
 
 module.exports = {
     getOperation,

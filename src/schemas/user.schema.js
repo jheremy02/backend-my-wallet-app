@@ -5,13 +5,15 @@ const first_name= Joi.string().max(100)
 const last_name=Joi.string().max(100)
 const email=Joi.string().email().max(100)
 const description = Joi.string().max(200)
+const password=Joi.string().max(100)
 
 const creatUserSchema= Joi.object({
     id:id,
     first_name:first_name.required(),
     last_name:last_name.required(),
     email:email.required(),
-    description:description
+    description:description,
+    password:password.required()
 })
 
 const getUserSchema = Joi.object({
