@@ -17,7 +17,9 @@ const LocalStrategy= new Strategy(async (username,password,done)=>{
 
     if (isMatched) {
         delete userFound.password;
-        done(null,userFound)
+        const resultRoles =await userService.getUserRoles(userFound.id)
+        const roles=resultRoles.map((role)=>role.idRole)
+        done(null,{userFound,roles})
     } else {
         done(boom.unauthorized("Ingrese correctamente su usuario o contraseña"),false)
     }

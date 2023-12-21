@@ -12,6 +12,34 @@ function checkApiKey(req,res,next) {
     }
 }
 
+function hasCommonElement(array1, array2) {
+    // Use the some() method to check if any element in array1 is present in array2
+    return array1.some(element => array2.includes(element));
+}
+
+
+function checkRoles(roles) {
+    return (req,res,next) =>{
+        console.log(req.user.roles)
+        const rolesFound=hasCommonElement(req.user.roles,roles)
+      
+        if (rolesFound) {
+            next()
+        }else {
+            next(boom.forbidden())
+        }
+    }
+}
+
+function addRoles(roles) {
+    return (req,res,next)=>{
+        req.body.roles=roles
+        next()
+    }
+}
+
 module.exports={
-    checkApiKey
+    checkApiKey,
+    addRoles,
+    checkRoles
 }

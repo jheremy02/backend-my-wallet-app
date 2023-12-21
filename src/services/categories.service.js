@@ -21,10 +21,10 @@ class CategoryService {
 
     }
 
-    async getCategories ()  {
+    async getCategories (idUser)  {
 
         try {
-            const [result] = await pool.query('SELECT * from categories_type_operation')
+            const [result] = await pool.query('SELECT * from categories_type_operation where id_user=?',[idUser])
             return result
         } catch (error) {
             throw new Error(error.message)

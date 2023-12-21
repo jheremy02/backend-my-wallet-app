@@ -25,7 +25,8 @@ const getCategory = async (req, res, next) => {
 
 const getCategories = async (req, res, next) => {
     try {
-        const result = await service.getCategories()
+        const idUser=req.user.sub
+        const result = await service.getCategories(idUser)
         res.json({
             data:result,
             success:true

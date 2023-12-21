@@ -22,13 +22,15 @@ const getUsers = async (req, res,next) => {
 
 const createUser = async (req, res,next) => {
 
-    const { first_name, last_name, email, description ,password} = req.body;
+    const { first_name, last_name, email, description ,password,roles} = req.body;
+   
     try {
 
         // [rows] destructuring de un array -> [rows] = [x,y,z] rows toma del valor de x respectivamente
-        const rows = await service.createUser({ first_name, last_name, email, description,password })
+        const rows = await service.createUser({ first_name, last_name, email, description,password,roles })
 
         res.json({data:{ id: rows.insertId, first_name, last_name, email, description },success:true})
+        
     } catch (error) {
 
         next(error)
