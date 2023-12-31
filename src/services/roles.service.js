@@ -13,6 +13,17 @@ class RoleService {
             throw new Error(error.message)
         }
     }
+
+    async getRolesByIdUser(idUser){
+
+        try {
+            const [rows]=await pool.query("SELECT * FROM roles WHERE idUser=?",[idUser])
+            
+            return rows
+        } catch (error) {
+            throw new Error(error.message)
+        }
+    }
 }
 
 module.exports=RoleService

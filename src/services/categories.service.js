@@ -1,5 +1,8 @@
 const pool = require("../../db");
+const RoleService = require("./roles.service");
+const UserService = require("./user.service");
 
+const rolesService = new RoleService()
 class CategoryService {
 
     constructor() {
@@ -21,15 +24,21 @@ class CategoryService {
 
     }
 
-    async getCategories (idUser)  {
+    async getCategories(idUser,roles) {
 
         try {
-            const [result] = await pool.query('SELECT * from categories_type_operation where id_user=?',[idUser])
-            return result
+            if (roles.includes(1)) {
+                const [result] = await pool.query('SELECT * from categories_type_operation')
+                return result
+            } else {
+                const [result] = await pool.query('SELECT * from categories_type_operation where id_user=?', [idUser])
+                return result
+            }
+
         } catch (error) {
             throw new Error(error.message)
         }
-    
+
     }
 
     async createCategory(newCategory) {
@@ -46,13 +55,13 @@ class CategoryService {
         }
     }
 
-    async updateCategory (updatedCategory) {
+    async updateCategory(updatedCategory) {
         try {
-            const { id , name, id_user, type_operation } = updatedCategory
-
+            const { id, name, id_user, type_operation } = updatedCategory
+                console.log(updatedCategory)
             const [result] = await pool.query(`UPDATE categories_type_operation
-            SET name =IFNULL(?,name), id_user = IFNULL(?,id_user) , type_operation= IFNULL(?,type_operation)  WHERE id = ? `,[name, id_user, type_operation,id])
-
+            SET name =IFNULL(?,name), id_user = IFNULL(?,id_user) , type_operation= IFNULL(?,type_operation)  WHERE id = ? `, [name, id_user, type_operation, id])
+        
             return result
 
         } catch (error) {
@@ -62,9 +71,9 @@ class CategoryService {
         }
     }
 
-    async deleteCategory (id) {
+    async deleteCategory(id) {
         try {
-            const [rows]=await pool.query('DELETE FROM categories_type_operation where id=?',[id])
+            const [rows] = await pool.query('DELETE FROM categories_type_operation where id=?', [id])
 
             return rows
         } catch (error) {

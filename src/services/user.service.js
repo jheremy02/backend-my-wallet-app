@@ -1,5 +1,6 @@
 const pool = require("../../db")
 const bcrypt = require('bcrypt')
+
 class UserService {
     constructor() {
 
@@ -10,7 +11,9 @@ class UserService {
         try {
             connection=await pool.beginTransaction()
             const [rows] = await pool.query('SELECT * FROM users WHERE id=?', [id])
-
+            if (rows.length <= 0) {
+                throw boom.notFound('User not found')
+            }
 
             await connection.commit()
             return rows
@@ -60,8 +63,10 @@ class UserService {
               [first_name, last_name, email, description, hashedPassword]
             );
       
+            
             await Promise.all(roles.map(async (role) => {
-              await connection.query('INSERT INTO roles_users (idUser, idRole) VALUES (?, ?)', [row.insertId, role]);
+                console.log([ role,row.insertId])
+              await connection.query('INSERT INTO roles_users (idRole, idUser) VALUES (?, ?)', [ role,row.insertId]);
         
             }));
       

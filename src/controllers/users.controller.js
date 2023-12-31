@@ -75,9 +75,7 @@ const getUser = async (req, res,next) => {
 
         const user = await service.getUser(req.params.id)
 
-        if (user.length <= 0) {
-            throw boom.notFound('User not found')
-        }
+        
 
         res.json({
             data:{ ...user[0] },

@@ -8,7 +8,7 @@ const router= express.Router()
 router.get('/',getCategories)
 router.get('/:id', validatorHandler(getCategorySchema,'query'), getCategory)
 router.post('/', validatorHandler(createCategorySchema,'body'), createCategory)
-router.delete('/',validatorHandler(deleteCategorySchema,'query'),deleteCategory)
+router.delete('/:id',validatorHandler(deleteCategorySchema,'params'),deleteCategory)
 router.put('/',validatorHandler(updateCategorySchema,'body'),updateCategory)
 
 module.exports=router

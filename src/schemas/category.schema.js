@@ -9,7 +9,7 @@ const createCategorySchema=Joi.object({
     name:name.required(),
     id_user:id_user.required(),
     type_operation:type_operation.required()
-})
+}).unknown(true)
 
 const getCategorySchema=Joi.object({
     id:id.required()
@@ -21,7 +21,7 @@ const updateCategorySchema=Joi.object({
     name:name,
     id_user:id_user,
     type_operation:type_operation
-})
+}).unknown(true)
 
 const getCategoriesSchema=Joi.object({
 
@@ -29,7 +29,7 @@ const getCategoriesSchema=Joi.object({
 
 const deleteCategorySchema=Joi.object({
     id:id.required()
-})
+}).unknown(true)
 
 module.exports={
     createCategorySchema,

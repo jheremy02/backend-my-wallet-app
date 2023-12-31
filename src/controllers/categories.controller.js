@@ -1,6 +1,6 @@
 const pool = require("../../db")
 const CategoryService = require("../services/categories.service")
-
+const  boom  = require("@hapi/boom")
 
 
 const service = new CategoryService
@@ -26,7 +26,8 @@ const getCategory = async (req, res, next) => {
 const getCategories = async (req, res, next) => {
     try {
         const idUser=req.user.sub
-        const result = await service.getCategories(idUser)
+        const roles=req.user.roles
+        const result = await service.getCategories(idUser,roles)
         res.json({
             data:result,
             success:true
@@ -38,7 +39,8 @@ const getCategories = async (req, res, next) => {
 
 const createCategory = async (req, res, next) => {
     try {
-        const { name, id_user, type_operation } = req.body
+        const id_user=req.user.sub
+        const { name, type_operation } = req.body
         const result = await service.createCategory({ name, id_user, type_operation })
         res.json({
             data:{ id: result.insertId, name, id_user, type_operation },
@@ -54,8 +56,8 @@ const createCategory = async (req, res, next) => {
 const updateCategory = async (req, res, next) => {
 
     try {
-        const { id } = req.params
-        const { name, id_user, type_operation } = req.body
+       
+        const { name, id_user, type_operation ,id} = req.body
         const result = await service.updateCategory({ name, id_user, type_operation, id })
 
         if (result.affectedRows <= 0) {
@@ -75,7 +77,7 @@ const updateCategory = async (req, res, next) => {
 
 const deleteCategory = async (req, res, next) => {
     try {
-        const rows = await service.deleteCategory(req.query.id)
+        const rows = await service.deleteCategory(req.params.id)
 
         if (rows.affectedRows <= 0) {
 
