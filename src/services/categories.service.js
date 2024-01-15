@@ -58,7 +58,7 @@ class CategoryService {
     async updateCategory(updatedCategory) {
         try {
             const { id, name, id_user, type_operation } = updatedCategory
-                console.log(updatedCategory)
+                
             const [result] = await pool.query(`UPDATE categories_type_operation
             SET name =IFNULL(?,name), id_user = IFNULL(?,id_user) , type_operation= IFNULL(?,type_operation)  WHERE id = ? `, [name, id_user, type_operation, id])
         

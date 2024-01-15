@@ -33,5 +33,40 @@ const getAccountsMoney=async (req,res,next) =>{
     }
 }
 
+const updateAccountMoney=async(req,res,next)=>{
 
-module.exports={createAccountCategory,getAccountsMoney}
+    try {
+        const {id,name,name_company}=req.body
+        const result = await service.updateAccountMoneyService({id,name,name_company})
+        if (result.affectedRows <= 0) {
+
+            throw boom.notFound('Account not found');
+
+        }
+
+        const accountFound=await service.getAccountMoneyById(id)
+        res.json({ message: 'updated successfully', success: true, data: { ...accountFound[0] } })
+
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+const deleteAccountMoney=async(req,res,next)=> {
+    try {
+        const result=await service.deleteAccountMoney(req.params.id)
+        
+        if (result.affectedRows <= 0) {
+
+            throw boom.notFound('Account Not found');
+        }
+
+        res.json({ message: 'deleted successfully', success: true })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+module.exports={createAccountCategory,getAccountsMoney,updateAccountMoney,deleteAccountMoney}

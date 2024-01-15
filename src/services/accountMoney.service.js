@@ -43,12 +43,38 @@ class AccountMoneyService {
     }
 
     async updateAccountMoneyService(updatedAccount) {
+
         try {
-            const {id, name, id_user, name_company, total_money, created_at, updated_at}=updatedAccount
-            const [result] = await pool.query(`UPDATE categories_type_operation
-            SET name =IFNULL(?,name), id_user = IFNULL(?,id_user) , type_operation= IFNULL(?,type_operation)  WHERE id = ? `, [name, id_user, type_operation, id])
+            const {id, name,  name_company}=updatedAccount
+            const [result] = await pool.query(`UPDATE account_money
+            SET name =IFNULL(?,name), name_company= IFNULL(?,name_company)  WHERE id = ? `, [name, name_company, id])
+
+            return result
         } catch (error) {
             throw new Error(error.message);
+        }
+
+    }
+
+    async getAccountMoneyById(id){
+        try {
+
+            const [rows] = await pool.query('SELECT * FROM account_money WHERE id=?', [id])
+
+            return rows
+
+        } catch (error) {
+
+            throw new Error(error.message)
+        }
+    }
+
+    async deleteAccountMoney(idAccount){
+        try {
+            const [rows] = await pool.query('DELETE FROM account_money WHERE id=?', [idAccount])
+            return rows
+        } catch (error) {
+            throw new Error(error.message)
         }
     }
 

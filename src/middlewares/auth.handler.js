@@ -20,7 +20,7 @@ function hasCommonElement(array1, array2) {
 
 function checkRoles(roles) {
     return (req,res,next) =>{
-        console.log(req.user.roles)
+        
         const rolesFound=hasCommonElement(req.user.roles,roles)
       
         if (rolesFound) {
