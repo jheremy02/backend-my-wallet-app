@@ -18,8 +18,43 @@ class AccountMoneyService {
             }
     }
 
+    async updateQuantityAccount (idAccount,type_operation,newAquantity) {
+        try {
+            const response = await this.getAccountMoneyById(idAccount);
+            
+            if (response.length<=0) {
+                throw new Error('Account Not found')
+            }
 
-    async getAccountsMoneyService(idUser,roles){
+            const [accountFound]=response
+            let quantityAccount = accountFound.total_money
+
+            if (type_operation==='IN') {
+                quantityAccount+=newAquantity
+                const [result] = await pool.query(`UPDATE account_money
+            SET total_money=IFNULL(?,total_money)  WHERE id = ? `, [quantityAccount,idAccount])
+            return result
+            }else if (type_operation==='OUT'){
+
+                quantityAccount-=newAquantity
+
+                if (quantityAccount<0) {
+                    throw new Error('Monto insuficiente en la cuenta')
+                }
+
+                const [result] = await pool.query(`UPDATE account_money
+            SET total_money=IFNULL(?,total_money)  WHERE id = ? `, [quantityAccount,idAccount])
+
+            return result
+            } else {
+                throw new Error('Operacion desconocida')
+            }
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async getAccountsMoneyService(idUser,roles) {
         
         try {
 

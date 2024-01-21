@@ -1,6 +1,7 @@
 const pool = require("../../db")
 const OperationService = require("../services/operations.service")
 const boom = require("@hapi/boom")
+const { getCurrentTime } = require("../utils/auth/functionsTools")
 const service = new OperationService()
 
 
@@ -41,28 +42,33 @@ const getOperations = async (req, res, next) => {
 
 const createOperation = async (req, res, next) => {
     try {
-        const { id_user, type_operation, state_operation, description, id_type_category } = req.body
-        const result = await service.createOperation({ id_user, type_operation, state_operation, description, id_type_category })
+        const id_user=req.user.sub
+        const {  type_operation, state_operation, description, id_type_category, date_operation,quantity,id_account_money } = req.body
+        
+        const current_time=getCurrentTime()
+        const date_operation_time=`${date_operation} ${current_time}`
+        const result = await service.createOperation({ id_user, type_operation, state_operation, description, id_type_category,date_operation_time,quantity,id_account_money })
 
         res.json({ data: { id: result.insertId, id_user, type_operation, state_operation, description, id_type_category} , success:true })
     } catch (error) {
         next(error)
     }
 
-
-
 }
 
 const updateOperation = async (req, res, next) =>{
     try {
 
-        const {id , id_user, type_operation, state_operation, description, id_type_category} = req.body
-
-        const result = await service.updateOperation({id , id_user, type_operation, state_operation, description, id_type_category} )
+        const {id , id_user, type_operation, state_operation, description, id_type_category,quantity,id_account_money,date_operation} = req.body
+        const current_time=getCurrentTime()
+        const date_operation_time=`${date_operation} ${current_time}`
+        const result = await service.updateOperation({id , id_user, type_operation, state_operation, description, id_type_category,quantity,id_account_money,date_operation_time} )
 
         if (result.affectedRows <= 0) {
-            throw boom.notFound('user nor found')
-        }
+
+            throw boom.notFound('Operation not found')
+
+        };
 
         const operationResult= await service.getOperation(id)
 
@@ -77,7 +83,7 @@ const updateOperation = async (req, res, next) =>{
 const deleteOperation=async (req, res, next)=>{
     try {
         const {id}=req.query
-        const [result]= await service.deleteOperation(id)
+        const [result]= await service.deleteOperation(Number(id))
       
         if (result.affectedRows <= 0) {
 

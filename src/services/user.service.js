@@ -65,7 +65,7 @@ class UserService {
       
             
             await Promise.all(roles.map(async (role) => {
-                console.log([ role,row.insertId])
+                
               await connection.query('INSERT INTO roles_users (idRole, idUser) VALUES (?, ?)', [ role,row.insertId]);
         
             }));

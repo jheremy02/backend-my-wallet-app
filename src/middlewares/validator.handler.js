@@ -4,6 +4,7 @@ function validatorHandler(schema,property) {
     return async function (req,res,next) {
         
         const id_user=req.user.sub
+        console.log(req.user.sub)
         const data=req[property]
         const {error}=schema.validate({...data,id_user})
 

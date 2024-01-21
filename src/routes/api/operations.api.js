@@ -5,8 +5,6 @@ const { updateOperationSchema, createOperationSchema, deleteOperationSchema, get
 
 const router= express.Router()
 
-
-
 router.get('/', validatorHandler(getOperationsSchema,'query'),getOperations)
 router.get('/',validatorHandler(getOperationSchema,'query'),getOperation)
 router.post('/',validatorHandler(createOperationSchema,'body'),createOperation)
