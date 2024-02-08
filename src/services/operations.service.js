@@ -1,29 +1,45 @@
 const pool = require("../../db");
+const { getCurrentDate } = require("../utils/auth/functionsTools");
 const AccountMoneyService = require("./accountMoney.service");
 
-const accountService=new AccountMoneyService();
+const boom = require("@hapi/boom")
+const accountService = new AccountMoneyService();
 
 class OperationService {
 
     constructor() {
+        this.connection = null
+    }
 
+    async setConnection(connection) {
+        this.connection = connection
     }
 
     async getOperation(id) {
         try {
             const [result] = await pool.query('SELECT * FROM operations WHERE id=?', [id])
-
-            return result
+            if (result.length <= 0) {
+                throw new Error('Operation not found');
+            }
+            return result[0]
         } catch (error) {
-            throw new Error(error.message)
+            throw error;
         }
     }
 
-    async getOperations() {
+    async getOperations(params) {
         try {
-            const [result] = await pool.query('SELECT * FROM operations')
+            const { start, endFormatted } = params
+            if (start && endFormatted) {
+                const [result] = await pool.query('SELECT * FROM operations WHERE date_operation BETWEEN ? and ?', [start, endFormatted])
+                return result
+            } else {
+                const currentDate = getCurrentDate()
+                const [result] = await pool.query('SELECT * FROM operations WHERE date_operation=?', [currentDate])
+                return result
+            }
 
-            return result
+
         } catch (error) {
             throw new Error(error.message)
         }
@@ -33,67 +49,99 @@ class OperationService {
 
 
         try {
+            await this.connection.beginTransaction();
             const { id_user, type_operation, state_operation, description, id_type_category, date_operation_time, quantity, id_account_money } = newOperation
-            const [result] = await pool.query('INSERT INTO operations (id_user,type_operation,state_operation,id_type_category,description,date_operation,quantity,id_account_money) values (?,?,?,?,?,?,?,?)', [id_user, type_operation, state_operation, id_type_category, description, date_operation_time, quantity, id_account_money])
+            const [result] = await this.connection.query('INSERT INTO operations (id_user,type_operation,state_operation,id_type_category,description,date_operation,quantity,id_account_money) values (?,?,?,?,?,?,?,?)', [id_user, type_operation, state_operation, id_type_category, description, date_operation_time, quantity, id_account_money])
 
-            const resultUpdateAccount=await accountService.updateQuantityAccount(id_account_money,type_operation,quantity)
 
+
+            await this.connection.commit()
             return result
 
         } catch (error) {
-            throw new Error(error.message)
+            await this.connection.rollback();
+            throw error;
         }
 
 
+    }
+
+    async reportsService(params) {
+        try {
+            const { report_name, year ,start ,end,id_user } = params
+            switch (report_name) {
+                case 'operations_by_month':
+                    const [result_in] = await this.connection.query(`SELECT MONTH(date_operation) AS month, SUM(quantity) AS total FROM operations WHERE YEAR(date_operation) = ? and  type_operation= 'IN' and id_user=? GROUP BY
+                    MONTH(date_operation) ORDER BY month`,[year,id_user])
+                    const [result_out] = await this.connection.query(`SELECT MONTH(date_operation) AS month, SUM(quantity) AS total FROM operations WHERE YEAR(date_operation) = ? and  type_operation= 'OUT' and id_user=? GROUP BY
+                    MONTH(date_operation) ORDER BY month`,[year,id_user,])
+                 
+                    return {result_in,result_out}
+                    break;
+                case 'operations_daily':
+
+                    const [result_in_dayly]=await this.connection.query(`SELECT DATE_FORMAT(date_operation, '%Y-%m-%d') AS formatted_date, sum(quantity) AS total
+                    FROM operations
+                    where type_operation='IN' and id_user=?
+                    GROUP BY formatted_date order by formatted_date;`,[id_user,start,end])
+
+                    
+
+                    const [result_out_dayly]=await this.connection.query(`SELECT DATE_FORMAT(date_operation, '%Y-%m-%d') AS formatted_date, sum(quantity) AS total
+                    FROM operations
+                    where type_operation='OUT' and id_user=?
+                    GROUP BY formatted_date order by formatted_date;`,[id_user,start,end])
+                    
+                    return {result_in_dayly,result_out_dayly}
+                default:
+                    break;
+            }
+        } catch (error) {
+            throw error
+        }
     }
 
     async updateOperation(updatedOperation) {
 
         try {
-            let { id, id_user, type_operation, state_operation, description, id_type_category, quantity, id_account_money, date_operation_time } = updatedOperation
-            const response = await this.getOperation(id)
-            const [operationFound] = response
-            if (response.length <= 0) {
-                throw new Error('Operation not found')
-            }
+            await this.connection.beginTransaction();
 
-            const [result] = await pool.query('UPDATE operations SET id_user = IFNULL(?,id_user), type_operation = IFNULL(?,type_operation), state_operation= IFNULL(?,state_operation) , id_type_category = IFNULL(?,id_type_category), description = IFNULL(?,description),quantity = IFNULL(?,quantity),id_account_money = IFNULL(?,id_account_money),date_operation = IFNULL(?,date_operation)   WHERE id=?', [id_user, type_operation, state_operation, id_type_category, description, quantity, id_account_money, date_operation_time, id])
-            //console.log(result,'updated operation')
+            let { id, id_user, type_operation, state_operation, description, id_type_category, quantity, id_account_money, date_operation_time } = updatedOperation;
 
-            const idAccount=operationFound.id_account_money
 
-            if ((operationFound.type_operation !== type_operation) || ((operationFound.quantity !== quantity)) || operationFound.id_account_money!==id_account_money ) {
+            const [result] = await this.connection.query('UPDATE operations SET id_user = IFNULL(?,id_user), type_operation = IFNULL(?,type_operation), state_operation= IFNULL(?,state_operation), id_type_category = IFNULL(?,id_type_category), description = IFNULL(?,description), quantity = IFNULL(?,quantity), id_account_money = IFNULL(?,id_account_money), date_operation = IFNULL(?,date_operation) WHERE id=?', [id_user, type_operation, state_operation, id_type_category, description, quantity, id_account_money, date_operation_time, id]);
 
-                
-                if (operationFound.type_operation === 'OUT') {
-                    const result=await accountService.updateQuantityAccount(idAccount,'IN',operationFound.quantity)
-
-                } else if (operationFound.type_operation === 'IN') {
-                    const result=await accountService.updateQuantityAccount(idAccount,'OUT',operationFound.quantity)
-
-                }
-
-                const resultUpdateAccount=await accountService.updateQuantityAccount(id_account_money,type_operation,quantity)
-
-            } 
-            
-            
-       
+            console.log(result)
+            await this.connection.commit()
             return result
-        } catch (error) {
-            console.log(error)
-            throw new Error(error.message);
 
+        } catch (error) {
+            await this.connection.rollback();
+            throw error;
+        } finally {
+            await this.connection.release();
         }
     }
 
     async deleteOperation(id) {
-        try {
-            const result = await pool.query('DELETE FROM OPERATIONS WHERE id=?', [id])
 
-            return result
+        try {
+            await this.connection.beginTransaction();
+
+            const result = await this.connection.query('DELETE FROM OPERATIONS WHERE id=?', [id]);
+
+            if (result.affectedRows <= 0) {
+                throw boom.notFound('Operation not found');
+            }
+
+            await this.connection.commit();
+
+            return result;
         } catch (error) {
-            throw new Error(error.message)
+            await this.connection.rollback();
+            throw error;
+        } finally {
+            this.connection.release();
         }
     }
 

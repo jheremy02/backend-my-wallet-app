@@ -1,13 +1,20 @@
 const pool = require("../../db");
 
-
+const  boom  = require("@hapi/boom")
 class AccountMoneyService {
 
     constructor(){
+        this.connection=null
+    }
 
+    async setConnection(connection){
+        
+        this.connection=connection
+        console.log(this.connection)
     }
 
     async createAccountMoney(newAccount) {
+
             const {name,id_user,name_company,total_money}=newAccount
             try {
                 const [result]=await pool.query('INSERT INTO account_money  (name,id_user,name_company,total_money) VALUES (?,?,?,?)',[name,id_user,name_company,total_money])
@@ -16,43 +23,50 @@ class AccountMoneyService {
             } catch (error) {
                 throw new Error(error.message)
             }
+
     }
 
-    async updateQuantityAccount (idAccount,type_operation,newAquantity) {
+    async updateQuantityAccount(idAccount, type_operation, newAquantity) {
+     
         try {
-            const response = await this.getAccountMoneyById(idAccount);
+            console.log(this.connection)
+            await this.connection.beginTransaction();
             
-            if (response.length<=0) {
-                throw new Error('Account Not found')
+            const response = await this.getAccountMoneyById(idAccount);
+    
+            if (response.length <= 0) {
+                throw new Error('Account Not found');
             }
-
-            const [accountFound]=response
-            let quantityAccount = accountFound.total_money
-
-            if (type_operation==='IN') {
-                quantityAccount+=newAquantity
-                const [result] = await pool.query(`UPDATE account_money
-            SET total_money=IFNULL(?,total_money)  WHERE id = ? `, [quantityAccount,idAccount])
-            return result
-            }else if (type_operation==='OUT'){
-
-                quantityAccount-=newAquantity
-
-                if (quantityAccount<0) {
-                    throw new Error('Monto insuficiente en la cuenta')
+    
+            const [accountFound] = response;
+            let quantityAccount = accountFound.total_money;
+    
+            if (type_operation === 'IN') {
+                quantityAccount += newAquantity;
+            } else if (type_operation === 'OUT') {
+                quantityAccount -= newAquantity;
+    
+                if (quantityAccount < 0) {
+                    throw new Error('Monto insuficiente en la cuenta');
                 }
-
-                const [result] = await pool.query(`UPDATE account_money
-            SET total_money=IFNULL(?,total_money)  WHERE id = ? `, [quantityAccount,idAccount])
-
-            return result
             } else {
-                throw new Error('Operacion desconocida')
+                throw new Error('Operacion desconocida');
             }
+    
+            const [result] = await this.connection.query(
+                `UPDATE account_money SET total_money=IFNULL(?,total_money)  WHERE id = ? `,
+                [quantityAccount, idAccount]
+            );
+    
+            await this.connection.commit();
+            return result;
         } catch (error) {
-            throw new Error(error.message);
+           
+            await this.connection.rollback();
+            throw error;
         }
     }
+    
 
     async getAccountsMoneyService(idUser,roles) {
         
@@ -64,7 +78,7 @@ class AccountMoneyService {
                 return result
 
             } else {
-                const [result] = await pool.query('SELECT * from account_money where id_user=?', [idUser])
+                const [result] = await pool.query('SELECT * from account_money  where id_user=?', [idUser])
 
                 return result
             }
@@ -94,6 +108,7 @@ class AccountMoneyService {
     async getAccountMoneyById(id){
         try {
 
+            
             const [rows] = await pool.query('SELECT * FROM account_money WHERE id=?', [id])
 
             return rows

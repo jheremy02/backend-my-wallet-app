@@ -7,4 +7,75 @@
     return `${hours}:${minutes}:${seconds}`;
   }
 
-  module.exports={getCurrentTime}
+  function addDayToDate(inputDateString) {
+    // Convert the input string to a Date object
+    var dateObject = new Date(inputDateString);
+
+    // Add one day to the date
+    console.log(dateObject.getDate())
+    dateObject.setDate(dateObject.getDate() + 1);
+
+    // Extract the year, month, and day components
+    var year = dateObject.getFullYear();
+    var month = ('0' + (dateObject.getMonth() + 1)).slice(-2);  // Months are 0-indexed, so we add 1
+    var day = ('0' + dateObject.getDate()).slice(-2);
+
+    // Format the date in 'yyyy-MM-dd' format
+    var formattedDate = year + '-' + month + '-' + day;
+    
+    return formattedDate;
+}
+
+function getCurrentDate() {
+  var currentDate = new Date();
+
+  // Extract the year, month, and day components
+  var year = currentDate.getFullYear();
+  var month = ('0' + (currentDate.getMonth() + 1)).slice(-2);  // Months are 0-indexed, so we add 1
+  var day = ('0' + currentDate.getDate()).slice(-2);
+
+  // Format the current date in 'yyyy-MM-dd' format
+  var formattedCurrentDate = year + '-' + month + '-' + day;
+
+  return formattedCurrentDate;
+}
+
+function compareObjects(obj1, obj2) {
+  // Get the keys of each object
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  // If the number of keys is different, objects are not equal
+  if (keys1.length !== keys2.length) {
+      return false;
+  }
+
+  // Iterate through keys and compare values
+  for (let key of keys1) {
+      // If the value of any key is not equal, objects are not equal
+      if (obj1[key] !== obj2[key]) {
+          return false;
+      }
+  }
+
+  // All attributes are equal
+  return true;
+}
+
+function combineAndSortDates(array1, array2) {
+  // Combine arrays and remove duplicates
+  let combinedArray = Array.from(new Set([...array1, ...array2]));
+
+  // Convert strings to Date objects for sorting
+  let dateObjects = combinedArray.map(dateStr => new Date(dateStr));
+
+  // Sort Date objects
+  dateObjects.sort((a, b) => a - b);
+
+  // Convert back to strings in 'yyyy-mm-dd' format
+  let sortedDateStrings = dateObjects.map(date => date.toISOString().split('T')[0]);
+
+  return sortedDateStrings;
+}
+
+  module.exports={getCurrentTime,addDayToDate,getCurrentDate,compareObjects,combineAndSortDates}

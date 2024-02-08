@@ -1,6 +1,7 @@
+
 const pool = require("../../db")
 const bcrypt = require('bcrypt')
-
+const  boom  = require("@hapi/boom")
 class UserService {
     constructor() {
 
