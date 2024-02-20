@@ -40,10 +40,10 @@ const getCategories = async (req, res, next) => {
 const createCategory = async (req, res, next) => {
     try {
         const id_user=req.user.sub
-        const { name, type_operation } = req.body
-        const result = await service.createCategory({ name, id_user, type_operation })
+        const { name} = req.body
+        const result = await service.createCategory({ name, id_user })
         res.json({
-            data:{ id: result.insertId, name, id_user, type_operation },
+            data:{ id: result.insertId, name, id_user },
             success:true
         })
     } catch (error) {

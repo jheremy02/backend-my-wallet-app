@@ -8,7 +8,7 @@ const type_operation=Joi.string().valid('OUT','IN')
 const createCategorySchema=Joi.object({
     name:name.required(),
     id_user:id_user.required(),
-    type_operation:type_operation.required()
+   
 }).unknown(true)
 
 const getCategorySchema=Joi.object({

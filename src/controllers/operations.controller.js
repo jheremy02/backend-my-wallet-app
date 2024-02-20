@@ -29,10 +29,11 @@ const getOperation = async (req, res, next) => {
 const getOperations = async (req, res, next) => {
 
     try {
+        const idUser=req.user.sub
         const { start, end } = req.query
         const endFormatted = end ? addDayToDate(`${end} ${getCurrentTime()}`) : null
 
-        const result = await service.getOperations({ start, endFormatted })
+        const result = await service.getOperations({ start, endFormatted,idUser })
         res.json({ data: result, success: true })
 
     } catch (error) {
@@ -85,6 +86,11 @@ const getOperationsReport = async (req, res, next) => {
               
                 break;
 
+            case 'totals':
+
+            const totalsOperations=await service.reportsService({ report_name, start,end ,id_user })
+            const totalsAccounts = await serviceAccount.getTotalsAccount(id_user)
+            res.json({ data: {...totalsAccounts,...totalsOperations}, success: true })
             default:
                 
                 break;

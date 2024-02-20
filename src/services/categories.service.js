@@ -46,7 +46,7 @@ class CategoryService {
         try {
             const { name, id_user, type_operation } = newCategory
             // [rows] destructuring de un array -> [rows] = [x,y,z] rows toma del valor de x respectivamente
-            const [rows] = await pool.query('INSERT INTO categories_type_operation (name,id_user,type_operation) VALUES (?,?,?)', [name, id_user, type_operation]);
+            const [rows] = await pool.query('INSERT INTO categories_type_operation (name,id_user) VALUES (?,?)', [name, id_user]);
 
             return rows
 

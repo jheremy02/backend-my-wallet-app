@@ -91,6 +91,16 @@ class AccountMoneyService {
 
     }
 
+     async getTotalsAccount(idUser){
+        try {
+            const [result]=await pool.query(`select sum(total_money) as total_money from account_money where id_user=?;`,[idUser]);
+            
+            return result[0]
+        } catch (error) {
+            throw error
+        }
+     }
+
     async updateAccountMoneyService(updatedAccount) {
 
         try {

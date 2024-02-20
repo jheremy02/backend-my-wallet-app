@@ -28,8 +28,6 @@ function routerApi(app) {
     app.use('/api/accounts-money',passport.authenticate('jwt',{
         session:false
     }),accountsMoneyApi)
-    
-    
 }
 
 module.exports=routerApi

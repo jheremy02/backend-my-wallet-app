@@ -29,13 +29,13 @@ class OperationService {
 
     async getOperations(params) {
         try {
-            const { start, endFormatted } = params
+            const { start, endFormatted,idUser} = params
             if (start && endFormatted) {
-                const [result] = await pool.query('SELECT * FROM operations WHERE date_operation BETWEEN ? and ?', [start, endFormatted])
+                const [result] = await pool.query('SELECT * FROM operations WHERE (date_operation BETWEEN ? and ?) and id_user=?', [start, endFormatted,idUser])
                 return result
             } else {
                 const currentDate = getCurrentDate()
-                const [result] = await pool.query('SELECT * FROM operations WHERE date_operation=?', [currentDate])
+                const [result] = await pool.query('SELECT * FROM operations WHERE date_operation=? and id_user=?', [currentDate,idUser])
                 return result
             }
 
@@ -80,19 +80,28 @@ class OperationService {
                     break;
                 case 'operations_daily':
 
-                    const [result_in_dayly]=await this.connection.query(`SELECT DATE_FORMAT(date_operation, '%Y-%m-%d') AS formatted_date, sum(quantity) AS total
+                    const [result_in_daily]=await this.connection.query(`SELECT DATE_FORMAT(date_operation, '%Y-%m-%d') AS formatted_date, sum(quantity) AS total
                     FROM operations
-                    where type_operation='IN' and id_user=?
+                    where type_operation='IN' and id_user=? and (date_operation between ? and ?)
                     GROUP BY formatted_date order by formatted_date;`,[id_user,start,end])
 
                     
 
-                    const [result_out_dayly]=await this.connection.query(`SELECT DATE_FORMAT(date_operation, '%Y-%m-%d') AS formatted_date, sum(quantity) AS total
+                    const [result_out_daily]=await this.connection.query(`SELECT DATE_FORMAT(date_operation, '%Y-%m-%d') AS formatted_date, sum(quantity) AS total
                     FROM operations
-                    where type_operation='OUT' and id_user=?
-                    GROUP BY formatted_date order by formatted_date;`,[id_user,start,end])
+                    where type_operation='OUT' and id_user=?  and (date_operation between ? and ?) GROUP BY formatted_date order by formatted_date;`,[id_user,start,end])
                     
-                    return {result_in_dayly,result_out_dayly}
+                    return {result_in_daily,result_out_daily}
+
+                    case 'totals' :
+
+                    const [total_in]=await this.connection.query(`select sum(quantity) as total_in from operations where type_operation='IN' and  state_operation='DONE' and id_user=? ;`,[id_user])
+
+                    const [total_out]=await this.connection.query(`select sum(quantity) as total_out from operations where type_operation='OUT' and  state_operation='DONE' and id_user=? ;`,[id_user])
+
+                    
+
+                    return {total_in:total_in[0].total_in,total_out:total_out[0].total_out}
                 default:
                     break;
             }
