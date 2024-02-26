@@ -117,10 +117,11 @@ class OperationService {
 
             let { id, id_user, type_operation, state_operation, description, id_type_category, quantity, id_account_money, date_operation_time } = updatedOperation;
 
+            console.log(description)
 
             const [result] = await this.connection.query('UPDATE operations SET id_user = IFNULL(?,id_user), type_operation = IFNULL(?,type_operation), state_operation= IFNULL(?,state_operation), id_type_category = IFNULL(?,id_type_category), description = IFNULL(?,description), quantity = IFNULL(?,quantity), id_account_money = IFNULL(?,id_account_money), date_operation = IFNULL(?,date_operation) WHERE id=?', [id_user, type_operation, state_operation, id_type_category, description, quantity, id_account_money, date_operation_time, id]);
 
-            console.log(result)
+        
             await this.connection.commit()
             return result
 

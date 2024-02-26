@@ -111,10 +111,10 @@ const updateOperation = async (req, res, next) => {
         await service.setConnection(connection)
         await connection.beginTransaction()
 
-        const { id, id_user, type_operation, state_operation, description, id_type_category, quantity, id_account_money, date_operation } = req.body
+        const { id, id_user, type_operation, state_operation, description  , id_type_category, quantity, id_account_money, date_operation } = req.body
 
         const current_time = getCurrentTime()
-        const date_operation_time = `${date_operation} ${current_time}`
+        const date_operation_time = `${date_operation} ${current_time}` 
         const [response] = await connection.query('SELECT * FROM operations WHERE id = ?', [id]);
         if (response.length <= 0) {
             throw new Error('Operation not found');
@@ -122,12 +122,12 @@ const updateOperation = async (req, res, next) => {
         const operationFound = response[0];
         const idAccount = operationFound.id_account_money;
 
-        const areEqual = compareObjects({ id_account_money: operationFound.id_account_money, quantity: operationFound.quantity, type_operation: operationFound.type_operation, state_operation: operationFound.state_operation }, { id_account_money, quantity, type_operation, state_operation })
+        const areEqual = compareObjects({ id_account_money: operationFound.id_account_money, quantity: operationFound.quantity, type_operation: operationFound.type_operation, state_operation: operationFound.state_operation , description:operationFound.description }, { id_account_money, quantity, type_operation, state_operation,description })
 
         if (areEqual) {
             await connection.commit()
             res.json({ message: 'updated successfully', status: true, data: { id, id_user, type_operation, state_operation, description, id_type_category, quantity, id_account_money, date_operation } })
-            console.log(state_operation, 'estado de operacion')
+         
             return;
         }
 
@@ -202,7 +202,7 @@ const updateOperation = async (req, res, next) => {
             throw new Error('Operacion desconocida')
         }
         const result = await service.updateOperation({ id, id_user, type_operation, state_operation, description, id_type_category, quantity, id_account_money, date_operation_time })
-        console.log(result)
+      
 
         if (result.affectedRows <= 0) {
 

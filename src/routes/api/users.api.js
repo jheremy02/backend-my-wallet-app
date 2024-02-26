@@ -7,7 +7,7 @@ const { checkApiKey } = require('../../middlewares/auth.handler')
 const passport = require('passport')
 
 
-const router= express.Router()
+const router= express.Router();
 
 
 router.get('/', getUsers)

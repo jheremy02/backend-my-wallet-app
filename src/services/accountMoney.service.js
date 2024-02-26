@@ -10,7 +10,7 @@ class AccountMoneyService {
     async setConnection(connection){
         
         this.connection=connection
-        console.log(this.connection)
+        
     }
 
     async createAccountMoney(newAccount) {
