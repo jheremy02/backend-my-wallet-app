@@ -1,18 +1,19 @@
 const { json } = require("express")
 const pool = require("../../db")
 const UserService = require("../services/user.service")
-const  boom  = require("@hapi/boom")
+const boom = require("@hapi/boom")
+const CurrencyService = require("../services/currency.service")
 
-const service = new UserService()
+const service = new UserService();
+const currencyService = new CurrencyService();
 
-
-const getUsers = async (req, res,next) => {
+const getUsers = async (req, res, next) => {
 
     try {
         const result = await service.getUsers()
         res.json({
-            data:result,
-            success:true
+            data: result,
+            success: true
         })
     } catch (error) {
         next(error)
@@ -20,26 +21,33 @@ const getUsers = async (req, res,next) => {
 
 }
 
-const createUser = async (req, res,next) => {
+const createUser = async (req, res, next) => {
 
-    const { first_name, last_name, email, description ,password,roles} = req.body;
-   
+    const { first_name, last_name, email, description, password, roles } = req.body;
+    const connection = await pool.getConnection()
     try {
 
-        // [rows] destructuring de un array -> [rows] = [x,y,z] rows toma del valor de x respectivamente
-        const rows = await service.createUser({ first_name, last_name, email, description,password,roles })
+        service.setConnection(connection);
+        currencyService.setConnection(connection);
+        await connection.beginTransaction();
 
-        res.json({data:{ id: rows.insertId, first_name, last_name, email, description },success:true})
-        
+        // [rows] destructuring de un array -> [rows] = [x,y,z] rows toma del valor de x respectivamente
+        const rows = await service.createUser({ first_name, last_name, email, description, password, roles })
+        const result=await currencyService.createCurrencyUser(rows.insertId,184);
+        const currency=await currencyService.getCurrencyUser(rows.insertId)
+        await connection.commit();
+        res.json({ data: { id: rows.insertId, first_name, last_name, email, description ,currency}, success: true })
+
     } catch (error) {
 
+        await connection.rollback();
         next(error)
 
     }
 
 }
 
-const updateUser = async (req, res,next) => {
+const updateUser = async (req, res, next) => {
 
     try {
         const { id } = req.params
@@ -59,7 +67,7 @@ const updateUser = async (req, res,next) => {
         }
 
         const userResult = await service.getUser(id)
-        res.json({ message: 'updated successfully', success: true, data: { ...userResult[0]  } })
+        res.json({ message: 'updated successfully', success: true, data: { ...userResult[0] } })
 
     } catch (error) {
 
@@ -69,17 +77,17 @@ const updateUser = async (req, res,next) => {
 
 
 
-const getUser = async (req, res,next) => {
+const getUser = async (req, res, next) => {
 
     try {
 
         const user = await service.getUser(req.params.id)
 
-        
+
 
         res.json({
-            data:{ ...user[0] },
-            success:true
+            data: { ...user[0] },
+            success: true
         });
 
     } catch (error) {

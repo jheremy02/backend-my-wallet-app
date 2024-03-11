@@ -25,19 +25,23 @@ const updateCurrencyUser = async (req, res, next) => {
         const { id_currency } = req.body
         const idUser = req.user.sub
         const currencyUserFound = await serviceCurrency.getCurrencyUser(idUser);
-
+        console.log(currencyUserFound)
         if (currencyUserFound) {
 
             const result = await serviceCurrency.updateCurrencyUser(currencyUserFound.id_currency_user, id_currency);
             await connection.commit();
-            res.json({ data: result, success: true })
+            res.json({ data: {id_currency}, success: true })
 
-        } else {
+        } 
+
+        /*
+            else {
 
             const result = await serviceCurrency.createCurrencyUser(idUser, id_currency);
             await connection.commit();
             res.json({ data: result, success: true })
         }
+        */
 
 
     } catch (error) {
@@ -50,11 +54,10 @@ const updateCurrencyUser = async (req, res, next) => {
 const getCurrencyUser=async(req, res, next)=>{
     try {
             
-        
         const idUser = req.user.sub
         const currencyUserFound = await serviceCurrency.getCurrencyUser(idUser);
-
-        res.json({data:currencyUserFound,success:true})
+        const currencyFound= await serviceCurrency.getCurrencyById(currencyUserFound.id_currency)
+        res.json({data:{...currencyUserFound,...currencyFound},success:true})
         
     } catch (error) {
         next(error)

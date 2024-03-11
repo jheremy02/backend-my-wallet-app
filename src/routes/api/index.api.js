@@ -7,7 +7,7 @@ const rolesApi=require('./roles.api')
 const { checkRoles } = require('../../middlewares/auth.handler')
 const passport = require('passport')
 const accountsMoneyApi=require("../api/accountsMoney.api")
-
+const currenciesApi=require('../api/currency.api')
 
 function routerApi(app) {
 
@@ -28,6 +28,9 @@ function routerApi(app) {
     app.use('/api/accounts-money',passport.authenticate('jwt',{
         session:false
     }),accountsMoneyApi)
+    app.use('/api/currency',passport.authenticate('jwt',{
+        session:false
+    }),currenciesApi)
 }
 
 module.exports=routerApi

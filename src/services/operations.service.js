@@ -35,7 +35,7 @@ class OperationService {
                 return result
             } else {
                 const currentDate = getCurrentDate()
-                const [result] = await pool.query('SELECT * FROM operations WHERE date_operation=? and id_user=?', [currentDate,idUser])
+                const [result] = await pool.query('SELECT * FROM operations WHERE id_user=?', [idUser])
                 return result
             }
 

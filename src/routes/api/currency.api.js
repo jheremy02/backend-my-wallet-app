@@ -6,7 +6,7 @@ const {getCurrencyUser,updateCurrencyUser,getCurrencies}=require('../../controll
 const router= express.Router();
 
 router.get('/',getCurrencies);
-router.get('/:id', validatorHandler(getCategorySchema,'query'), getCurrencyUser);
-router.put('/',validatorHandler(updateCategorySchema,'body'),updateCurrencyUser);
+router.get('/myCurrency', getCurrencyUser);
+router.put('/',updateCurrencyUser);
 
 module.exports=router

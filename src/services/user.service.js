@@ -5,6 +5,12 @@ const  boom  = require("@hapi/boom")
 class UserService {
     constructor() {
 
+        this.connection=null ;  
+
+    }
+
+    setConnection(connection){
+        this.connection=connection
     }
 
     async getUser(id) {
@@ -55,11 +61,11 @@ class UserService {
         const hashedPassword = await bcrypt.hash(password, 10);
       
         try {
-          const connection = await pool.getConnection();
-          await connection.beginTransaction();
+          //const connection = await pool.getConnection();
+          await  this.connection.beginTransaction();
       
           try {
-            const [row] = await connection.query(
+            const [row] = await  this.connection.query(
               'INSERT INTO users (first_name, last_name, email, description, password) VALUES (?, ?, ?, ?, ?)',
               [first_name, last_name, email, description, hashedPassword]
             );
@@ -67,17 +73,17 @@ class UserService {
             
             await Promise.all(roles.map(async (role) => {
                 
-              await connection.query('INSERT INTO roles_users (idRole, idUser) VALUES (?, ?)', [ role,row.insertId]);
+              await  this.connection.query('INSERT INTO roles_users (idRole, idUser) VALUES (?, ?)', [ role,row.insertId]);
         
             }));
       
-            await connection.commit();
+            await  this.connection.commit();
             return row; // Assuming you only need the first row (created user)
           } catch (error) {
-            await connection.rollback();
+            await  this.connection.rollback();
             throw error;
           } finally {
-            connection.release();
+            this.connection.release();
           }
         } catch (error) {
           throw new Error(`Error creating user: ${error.message}`);
